@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valorant Elo Boost - Teslim Al ve Takip Et</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0d0e15;
+      --primary-color: #ff4655; /* Valorant Red */
+      --secondary-color: #0f1923;
+      --accent-color: #4cc9f0;
+      --text-color: #f8f9fa;
+      --glass-bg: rgba(20, 22, 35, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 70, 85, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(76, 201, 240, 0.12) 0%, transparent 40%);
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    /* Container */
+    .container {
+      width: 100%;
+      max-width: 550px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: var(--glass-shadow);
+      transition: all 0.4s ease;
+    }
+
+    h1 {
+      font-weight: 800;
+      font-size: 2.2rem;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff 50%, var(--primary-color) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 35px;
+      font-size: 0.95rem;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 22px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: #fff;
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary-color);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(255, 70, 85, 0.2);
+    }
+
+    input:disabled, select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 16px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 70, 85, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn:hover {
+      background: #e83e4c;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 70, 85, 0.5);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.4);
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    /* Alerts and warnings */
+    .warning-box {
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid rgba(255, 193, 7, 0.2);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 25px;
+      font-size: 0.85rem;
+      color: #ffc107;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .warning-title {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .error-msg {
+      background: rgba(255, 70, 85, 0.1);
+      border: 1px solid rgba(255, 70, 85, 0.2);
+      color: var(--primary-color);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .checkbox-group {
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .checkbox-group input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--primary-color);
+      cursor: pointer;
+    }
+
+    /* Steps */
+    .step-section {
+      display: none;
+    }
+
+    .step-section.active {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    /* Live Tracking Progress UI */
+    .tracking-card {
+      text-align: center;
+    }
+
+    .ranks-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 30px 0;
+    }
+
+    .rank-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .rank-badge {
+      width: 64px;
+      height: 64px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--accent-color);
+      font-size: 0.8rem;
+      text-align: center;
+      word-break: break-all;
+      padding: 4px;
+    }
+
+    .rank-node.current .rank-badge {
+      background: rgba(255, 70, 85, 0.15);
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      box-shadow: 0 0 15px rgba(255, 70, 85, 0.3);
+    }
+
+    .rank-arrow {
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 1.5rem;
+    }
+
+    .rank-title {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .rank-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .progress-wrapper {
+      margin: 25px 0;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      width: 0%;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+    }
+
+    .status-pending { background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3); }
+    .status-processing { background: rgba(76, 201, 240, 0.15); color: #4cc9f0; border: 1px solid rgba(76, 201, 240, 0.3); }
+    .status-completed { background: rgba(40, 167, 69, 0.15); color: #28a745; border: 1px solid rgba(40, 167, 69, 0.3); }
+    .status-canceled { background: rgba(220, 53, 69, 0.15); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.3); }
+
+    .last-update {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 15px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>KODTESLİMAL</h1>
+    <div class="subtitle">Valorant Elo Boost Otomasyonu</div>
+
+    <!-- Error Messages -->
+    <div id="errorBox" class="error-msg"></div>
+
+    <!-- STEP 1: KEY VERIFICATION -->
+    <div id="stepVerify" class="step-section active">
+      <div class="form-group">
+        <label for="keyCodeInput">Stok Kodu (Key)</label>
+        <input type="text" id="keyCodeInput" placeholder="VAL-KEY-XXXXX" autocomplete="off">
+      </div>
+      <button class="btn" id="btnVerify">Kodu Doğrula</button>
+    </div>
+
+    <!-- STEP 2: DETAILS FORM -->
+    <div id="stepForm" class="step-section">
+      <div class="warning-box">
+        <span class="warning-title">Önemli Uyarı</span>
+        <span>Satın aldığınız rank aralığından farklı bir seçim yaparsanız siparişiniz iptal edilebilir.</span>
+      </div>
+
+      <div class="form-group">
+        <label>Stok Kodu</label>
+        <input type="text" id="verifiedKey" disabled>
+      </div>
+
+      <div class="form-group">
+        <label for="riotUser">Riot Hesabı (Kullanıcı Adı#TAG)</label>
+        <input type="text" id="riotUser" placeholder="Örn: PlayerName#TR1">
+      </div>
+
+      <div class="form-group">
+        <label for="riotLoginUser">Kullanıcı Adı</label>
+        <input type="text" id="riotLoginUser" placeholder="Riot Giriş Kullanıcı Adı">
+      </div>
+
+      <div class="form-group">
+        <label for="riotPass">Şifre</label>
+        <input type="password" id="riotPass" placeholder="••••••••">
+      </div>
+
+      <datalist id="ranksList">
+        <option value="Demir 1"></option>
+        <option value="Demir 2"></option>
+        <option value="Demir 3"></option>
+        <option value="Bronz 1"></option>
+        <option value="Bronz 2"></option>
+        <option value="Bronz 3"></option>
+        <option value="Gümüş 1"></option>
+        <option value="Gümüş 2"></option>
+        <option value="Gümüş 3"></option>
+        <option value="Altın 1"></option>
+        <option value="Altın 2"></option>
+        <option value="Altın 3"></option>
+        <option value="Plat 1"></option>
+        <option value="Plat 2"></option>
+        <option value="Plat 3"></option>
+        <option value="Elmas 1"></option>
+        <option value="Elmas 2"></option>
+        <option value="Elmas 3"></option>
+        <option value="Yücelik 1"></option>
+        <option value="Yücelik 2"></option>
+        <option value="Yücelik 3"></option>
+        <option value="Immortal 1"></option>
+        <option value="Immortal 2"></option>
+        <option value="Immortal 3"></option>
+        <option value="Radyant"></option>
+      </datalist>
+
+      <div class="form-group">
+        <label for="startRank">Başlangıç Rankı</label>
+        <input type="text" id="startRank" list="ranksList" placeholder="Rank aratın veya seçin..." value="Altın 1">
+      </div>
+
+      <div class="form-group">
+        <label for="targetRank">Hedef Rank</label>
+        <input type="text" id="targetRank" list="ranksList" placeholder="Rank aratın veya seçin..." value="Altın 3">
+      </div>
+
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="twoFaCheckbox">
+        <label for="twoFaCheckbox" style="margin-bottom: 0;">2FA (İki Faktörlü Doğrulama) Açık mı?</label>
+      </div>
+
+      <!-- 2FA Alert Box -->
+      <div id="twoFaAlert" class="warning-box" style="display: none; background: rgba(220, 53, 69, 0.1); border-color: rgba(220, 53, 69, 0.2); color: #ff6b6b;">
+        <span class="warning-title">DİKKAT</span>
+        <span>Lütfen devam etmek için Riot hesabınızdan 2FA (İki Faktörlü Doğrulama) ayarını kapatın. Aksi takdirde işlem başlatılamaz.</span>
+      </div>
+
+      <button class="btn" id="btnSubmit" disabled>Elo Boostu Başlat</button>
+    </div>
+
+    <!-- STEP 3: LIVE TRACKING -->
+    <div id="stepTracking" class="step-section tracking-card">
+      <div class="status-badge status-processing" id="orderStatus">Yükleniyor...</div>
+
+      <div class="ranks-display">
+        <div class="rank-node">
+          <div class="rank-badge" id="trackStartBadge">VAL</div>
+          <span class="rank-title">Başlangıç</span>
+          <span class="rank-value" id="trackStartText">-</span>
+        </div>
+        <div class="rank-arrow">➜</div>
+        <div class="rank-node current">
+          <div class="rank-badge" id="trackCurrentBadge">VAL</div>
+          <span class="rank-title">Güncel</span>
+          <span class="rank-value" id="trackCurrentText">-</span>
+        </div>
+        <div class="rank-arrow">➜</div>
+        <div class="rank-node">
+          <div class="rank-badge" id="trackTargetBadge">VAL</div>
+          <span class="rank-title">Hedef</span>
+          <span class="rank-value" id="trackTargetText">-</span>
+        </div>
+      </div>
+
+      <div class="progress-wrapper">
+        <div class="progress-info">
+          <span>Tamamlanma Oranı</span>
+          <span id="progressPercent">%0</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+      </div>
+
+      <div class="last-update" id="lastUpdateText">Son Güncelleme: -</div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration
+    const API_BASE = ''; // Same host (absolute routes like /api/customer/...)
+    
+    // State
+    let activeKey = null;
+    let activeOrderId = null;
+    let trackingInterval = null;
+
+    // Elements
+    const stepVerify = document.getElementById('stepVerify');
+    const stepForm = document.getElementById('stepForm');
+    const stepTracking = document.getElementById('stepTracking');
+    const errorBox = document.getElementById('errorBox');
+    
+    const keyCodeInput = document.getElementById('keyCodeInput');
+    const btnVerify = document.getElementById('btnVerify');
+    
+    const verifiedKey = document.getElementById('verifiedKey');
+    const riotUser = document.getElementById('riotUser');
+    const riotLoginUser = document.getElementById('riotLoginUser');
+    const riotPass = document.getElementById('riotPass');
+    const startRank = document.getElementById('startRank');
+    const targetRank = document.getElementById('targetRank');
+    const twoFaCheckbox = document.getElementById('twoFaCheckbox');
+    const twoFaAlert = document.getElementById('twoFaAlert');
+    const btnSubmit = document.getElementById('btnSubmit');
+
+    // Show Error
+    function showError(msg) {
+      if (msg) {
+        errorBox.textContent = msg;
+        errorBox.style.display = 'block';
+      } else {
+        errorBox.style.display = 'none';
+      }
+    }
+
+    // Step Switcher
+    function showStep(step) {
+      stepVerify.classList.remove('active');
+      stepForm.classList.remove('active');
+      stepTracking.classList.remove('active');
+      
+      if (step === 'verify') stepVerify.classList.add('active');
+      if (step === 'form') stepForm.classList.add('active');
+      if (step === 'tracking') stepTracking.classList.add('active');
+    }
+
+    // Step 1: Verify Code
+    btnVerify.addEventListener('click', async () => {
+      showError(null);
+      const code = keyCodeInput.value.trim();
+      if (!code) return showError('Lütfen bir stok kodu girin.');
+
+      btnVerify.disabled = true;
+      btnVerify.textContent = 'Doğrulanıyor...';
+
+      try {
+        const res = await fetch(`/verify-key/${code}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Anahtar doğrulanamadı.');
+        }
+
+        activeKey = data.key;
+        verifiedKey.value = activeKey.key_code;
+
+        // Manage Fixed Rank overrides
+        if (activeKey.is_fixed_rank) {
+          startRank.value = activeKey.start_rank;
+          targetRank.value = activeKey.target_rank;
+          startRank.disabled = true;
+          targetRank.disabled = true;
+        } else {
+          startRank.disabled = false;
+          targetRank.disabled = false;
+        }
+
+        showStep('form');
+        checkFormValidity();
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        btnVerify.disabled = false;
+        btnVerify.textContent = 'Kodu Doğrula';
+      }
+    });
+
+    // Form inputs change validation
+    function checkFormValidity() {
+      const isRiotUserEmpty = !riotUser.value.trim();
+      const isLoginUserEmpty = !riotLoginUser.value.trim();
+      const isRiotPassEmpty = !riotPass.value;
+      const is2FaChecked = twoFaCheckbox.checked;
+
+      // Disable submit if fields are empty OR if 2FA is checked
+      btnSubmit.disabled = isRiotUserEmpty || isLoginUserEmpty || isRiotPassEmpty || is2FaChecked;
+    }
+
+    riotUser.addEventListener('input', checkFormValidity);
+    riotLoginUser.addEventListener('input', checkFormValidity);
+    riotPass.addEventListener('input', checkFormValidity);
+    
+    twoFaCheckbox.addEventListener('change', () => {
+      if (twoFaCheckbox.checked) {
+        twoFaAlert.style.display = 'flex';
+      } else {
+        twoFaAlert.style.display = 'none';
+      }
+      checkFormValidity();
+    });
+
+    // Step 2: Create Order
+    const VALID_RANKS = [
+      'Demir 1', 'Demir 2', 'Demir 3',
+      'Bronz 1', 'Bronz 2', 'Bronz 3',
+      'Gümüş 1', 'Gümüş 2', 'Gümüş 3',
+      'Altın 1', 'Altın 2', 'Altın 3',
+      'Plat 1', 'Plat 2', 'Plat 3',
+      'Elmas 1', 'Elmas 2', 'Elmas 3',
+      'Yücelik 1', 'Yücelik 2', 'Yücelik 3',
+      'Immortal 1', 'Immortal 2', 'Immortal 3',
+      'Radyant'
+    ];
+
+    btnSubmit.addEventListener('click', async () => {
+      showError(null);
+      
+      const startVal = startRank.value.trim();
+      const targetVal = targetRank.value.trim();
+
+      // If the stock key allows flexible rank choices, validate the inputs
+      if (!activeKey.is_fixed_rank) {
+        if (!VALID_RANKS.includes(startVal)) {
+          showError('Lütfen başlangıç rankı için listeden geçerli bir rank seçiniz veya yazdığınız yazıyı siliniz.');
+          return;
+        }
+        if (!VALID_RANKS.includes(targetVal)) {
+          showError('Lütfen hedef rankı için listeden geçerli bir rank seçiniz veya yazdığınız yazıyı siliniz.');
+          return;
+        }
+      }
+
+      const payload = {
+        key_code: activeKey.key_code,
+        customer_riot_id: riotUser.value.trim(),
+        customer_riot_username: riotLoginUser.value.trim(),
+        customer_riot_password: riotPass.value,
+        start_rank: startVal,
+        target_rank: targetVal
+      };
+
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = 'Sipariş Kaydediliyor...';
+
+      try {
+        const res = await fetch('/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Sipariş kaydedilemedi.');
+        }
+
+        activeOrderId = data.order_id;
+        showStep('tracking');
+        startTracking(activeOrderId);
+      } catch (err) {
+        showError(err.message);
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Elo Boostu Başlat';
+      }
+    });
+
+    // Step 3: Live MMR status check
+    async function updateTrackingInfo(orderId) {
+      try {
+        const res = await fetch(`/orders/${orderId}`);
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error);
+
+        const order = data.order;
+        const cache = data.cache;
+
+        // Update status badge
+        const statusEl = document.getElementById('orderStatus');
+        statusEl.className = `status-badge status-${order.status}`;
+        
+        let TurkishStatus = 'Kuyrukta';
+        if (order.status === 'processing') TurkishStatus = 'Boost Yapılıyor';
+        if (order.status === 'completed') TurkishStatus = 'Tamamlandı';
+        if (order.status === 'canceled') TurkishStatus = 'İptal Edildi';
+        
+        statusEl.textContent = TurkishStatus;
+
+        // Set Ranks Text
+        document.getElementById('trackStartText').textContent = order.start_rank;
+        document.getElementById('trackCurrentText').textContent = `${order.current_rank} (${order.current_kp} KP)`;
+        document.getElementById('trackTargetText').textContent = order.target_rank;
+
+        // Badges
+        document.getElementById('trackStartBadge').textContent = order.start_rank.substring(0, 3).toUpperCase();
+        document.getElementById('trackCurrentBadge').textContent = order.current_rank ? order.current_rank.substring(0, 3).toUpperCase() : 'VAL';
+        document.getElementById('trackTargetBadge').textContent = order.target_rank.substring(0, 3).toUpperCase();
+
+        // Progress Fill
+        document.getElementById('progressPercent').textContent = `%${order.progress_percentage}`;
+        document.getElementById('progressBar').style.width = `${order.progress_percentage}%`;
+
+        // Cache update indicator
+        if (cache.minutes_ago === 0) {
+          document.getElementById('lastUpdateText').textContent = `Son Güncelleme: Az önce (${cache.source === 'live_api' ? 'MMR API' : 'Önbellek'})`;
+        } else {
+          document.getElementById('lastUpdateText').textContent = `Son Güncelleme: ${cache.minutes_ago} dakika önce`;
+        }
+
+        // If completed or canceled, stop interval
+        if (order.status === 'completed' || order.status === 'canceled') {
+          clearInterval(trackingInterval);
+        }
+      } catch (err) {
+        console.error('Tracking fetch error:', err);
+      }
+    }
+
+    function startTracking(orderId) {
+      updateTrackingInfo(orderId);
+      // Refresh every 30 seconds
+      trackingInterval = setInterval(() => {
+        updateTrackingInfo(orderId);
+      }, 30000);
+    }
+  </script>
+</body>
+</html>

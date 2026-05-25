@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elo Boost Yönetim Paneli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0b0c10;
+      --primary-color: #ff4655;
+      --secondary-color: #1f2833;
+      --accent-color: #66fcf1;
+      --text-color: #f8f9fa;
+      --glass-bg: rgba(20, 24, 33, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 5% 5%, rgba(102, 252, 241, 0.05) 0%, transparent 35%),
+        radial-gradient(circle at 95% 95%, rgba(255, 70, 85, 0.08) 0%, transparent 40%);
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0;
+      width: 100%;
+    }
+
+    h1, h2, h3 {
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    h1 {
+      margin-bottom: 25px;
+      background: linear-gradient(135deg, #fff, var(--primary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+      margin-bottom: 30px;
+    }
+
+    /* Auth Screen */
+    .login-container {
+      max-width: 400px;
+      margin: 100px auto;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: white;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary-color);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+
+    .btn:hover {
+      background: #e83e4c;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+    }
+
+    /* Grid Layouts */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.9rem;
+    }
+
+    th {
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .bg-pending { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
+    .bg-processing { background: rgba(76, 201, 240, 0.15); color: #4cc9f0; }
+    .bg-completed { background: rgba(40, 167, 69, 0.15); color: #28a745; }
+    .bg-canceled { background: rgba(220, 53, 69, 0.15); color: #dc3545; }
+
+    /* Utilities */
+    .flex-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .flex-space-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .error-text {
+      color: var(--primary-color);
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+    }
+
+    .logout-btn {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .credentials-box {
+      margin-top: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. LOGIN SCREEN -->
+  <div id="loginScreen" class="glass-card login-container">
+    <h2 style="text-align: center; margin-bottom: 25px; color: var(--primary-color);">Panel Girişi</h2>
+    <div id="loginError" class="error-text" style="display: none;"></div>
+    <div class="form-group">
+      <label for="loginUser">Kullanıcı Adı</label>
+      <input type="text" id="loginUser" placeholder="admin veya booster username">
+    </div>
+    <div class="form-group">
+      <label for="loginPass">Şifre</label>
+      <input type="password" id="loginPass" placeholder="••••••••">
+    </div>
+    <button class="btn" id="btnLogin" style="width: 100%;">Giriş Yap</button>
+  </div>
+
+  <!-- 2. MAIN ADMIN BOARD (HIDDEN INITIALLY) -->
+  <div id="mainDashboard" class="container" style="display: none;">
+    <h1>
+      <span>Yönetim ve Çalışan Paneli</span>
+      <span class="logout-btn" id="btnLogout">Güvenli Çıkış</span>
+    </h1>
+
+    <div class="dashboard-grid">
+      <!-- Left side: Orders table -->
+      <div class="glass-card">
+        <h2>Aktif Siparişler</h2>
+        <div style="overflow-x: auto;">
+          <table id="ordersTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Riot ID</th>
+                <th>Süreç</th>
+                <th>Durum</th>
+                <th>Booster</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Orders injected here -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Credential View Modal Area -->
+        <div id="credArea" style="display: none;" class="credentials-box">
+          <h3>Riot Hesabı Giriş Bilgileri</h3>
+          <div><strong>Kullanıcı Adı:</strong> <span id="credUser">-</span></div>
+          <div><strong>Şifre:</strong> <span id="credPass">-</span></div>
+          <button class="btn btn-secondary btn-sm" id="btnCloseCreds" style="margin-top: 10px; width: fit-content;">Kapat</button>
+        </div>
+      </div>
+
+      <!-- Right side: Creator Forms -->
+      <div>
+        <!-- Key Generator -->
+        <div class="glass-card" id="keyGenCard">
+          <h2>Stok Kodu Üret</h2>
+          <div class="form-group" style="margin-top: 15px;">
+            <label>Key Kodu</label>
+            <input type="text" value="[Otomatik Benzersiz Üretilecek]" disabled>
+          </div>
+          <div class="form-group">
+            <label for="keyFixed">Rank Sabit mi?</label>
+            <select id="keyFixed">
+              <option value="false">Hayır (Manuel Seçim)</option>
+              <option value="true">Evet (Sabit Rank)</option>
+            </select>
+          </div>
+          <datalist id="adminRanksList">
+            <option value="Demir 1"></option>
+            <option value="Demir 2"></option>
+            <option value="Demir 3"></option>
+            <option value="Bronz 1"></option>
+            <option value="Bronz 2"></option>
+            <option value="Bronz 3"></option>
+            <option value="Gümüş 1"></option>
+            <option value="Gümüş 2"></option>
+            <option value="Gümüş 3"></option>
+            <option value="Altın 1"></option>
+            <option value="Altın 2"></option>
+            <option value="Altın 3"></option>
+            <option value="Plat 1"></option>
+            <option value="Plat 2"></option>
+            <option value="Plat 3"></option>
+            <option value="Elmas 1"></option>
+            <option value="Elmas 2"></option>
+            <option value="Elmas 3"></option>
+            <option value="Yücelik 1"></option>
+            <option value="Yücelik 2"></option>
+            <option value="Yücelik 3"></option>
+            <option value="Immortal 1"></option>
+            <option value="Immortal 2"></option>
+            <option value="Immortal 3"></option>
+            <option value="Radyant"></option>
+          </datalist>
+
+          <div class="form-group">
+            <label for="keyStartRank">Başlangıç Rankı (Eğer sabitse)</label>
+            <input type="text" id="keyStartRank" list="adminRanksList" placeholder="Rank aratın veya seçin..." value="Gümüş 1">
+          </div>
+          <div class="form-group">
+            <label for="keyTargetRank">Hedef Rank (Eğer sabitse)</label>
+            <input type="text" id="keyTargetRank" list="adminRanksList" placeholder="Rank aratın veya seçin..." value="Altın 1">
+          </div>
+          <button class="btn" id="btnGenKey" style="width: 100%;">Key Kodunu Kaydet</button>
+        </div>
+        </div>
+
+        <!-- User / Booster Creator -->
+        <div class="glass-card" id="userGenCard">
+          <h2>Yeni Kullanıcı / Booster</h2>
+          <div class="form-group" style="margin-top: 15px;">
+            <label for="newUser">Kullanıcı Adı</label>
+            <input type="text" id="newUser">
+          </div>
+          <div class="form-group">
+            <label for="newEmail">E-posta</label>
+            <input type="text" id="newEmail" placeholder="ornek@kodteslimal.com">
+          </div>
+          <div class="form-group">
+            <label for="newPass">Şifre</label>
+            <input type="password" id="newPass">
+          </div>
+          <div class="form-group">
+            <label for="newRole">Rol</label>
+            <select id="newRole">
+              <option value="booster">Booster (Çalışan)</option>
+              <option value="manager">Manager (Yönetici)</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="newMaxRank">Maksimum Rank Yetkinliği</label>
+            <input type="text" id="newMaxRank" value="Radiant" placeholder="Radiant">
+          </div>
+          <button class="btn" id="btnCreateUser" style="width: 100%;">Kullanıcıyı Kaydet</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit Logs Area -->
+    <div class="glass-card" id="logsCard">
+      <h2>Güvenlik ve Atama Denetim Günlükleri (Audit Logs)</h2>
+      <div style="overflow-x: auto;">
+        <table id="logsTable">
+          <thead>
+            <tr>
+              <th>Zaman</th>
+              <th>Booster / Yapan</th>
+              <th>Sipariş ID</th>
+              <th>Eylem</th>
+              <th>IP Adresi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Logs injected here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('admin_token') || '';
+    let currentUser = null;
+    let boostersList = [];
+
+    const loginScreen = document.getElementById('loginScreen');
+    const mainDashboard = document.getElementById('mainDashboard');
+    const loginError = document.getElementById('loginError');
+
+    // Init App
+    if (token) {
+      showDashboard();
+    }
+
+    // Login logic
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      loginError.style.display = 'none';
+      const username = document.getElementById('loginUser').value.trim();
+      const password = document.getElementById('loginPass').value;
+
+      if (!username || !password) {
+        loginError.textContent = 'Tüm alanları doldurun.';
+        loginError.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Giriş yapılamadı.');
+
+        token = data.token;
+        currentUser = data.user;
+        localStorage.setItem('admin_token', token);
+        showDashboard();
+      } catch (err) {
+        loginError.textContent = err.message;
+        loginError.style.display = 'block';
+      }
+    });
+
+    // Logout
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      token = '';
+      currentUser = null;
+      localStorage.removeItem('admin_token');
+      mainDashboard.style.display = 'none';
+      loginScreen.style.display = 'block';
+    });
+
+    async function showDashboard() {
+      loginScreen.style.display = 'none';
+      mainDashboard.style.display = 'block';
+      
+      // Parse User from token locally
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        currentUser = JSON.parse(window.atob(base64));
+      } catch (e) {
+        console.error('Token parsing error', e);
+      }
+
+      // Hide Admin cards if role is booster
+      if (currentUser && currentUser.role === 'booster') {
+        document.getElementById('keyGenCard').style.display = 'none';
+        document.getElementById('userGenCard').style.display = 'none';
+        document.getElementById('logsCard').style.display = 'none';
+      } else {
+        document.getElementById('keyGenCard').style.display = 'block';
+        document.getElementById('userGenCard').style.display = 'block';
+        document.getElementById('logsCard').style.display = 'block';
+        loadBoosters();
+        loadAuditLogs();
+      }
+
+      loadOrders();
+    }
+
+    // Load Eligible Boosters (Admin only)
+    async function loadBoosters() {
+      try {
+        const res = await fetch('/boosters', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        boostersList = await res.json();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Load active logs (Admin only)
+    async function loadAuditLogs() {
+      try {
+        const res = await fetch('/audit-logs', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const logs = await res.json();
+        
+        const tbody = document.querySelector('#logsTable tbody');
+        tbody.innerHTML = '';
+        
+        logs.forEach(log => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${new Date(log.created_at || log.timestamp).toLocaleString()}</td>
+            <td><strong>${log.booster ? log.booster.username : 'Bilinmeyen'}</strong> (${log.booster ? log.booster.role : '-'})</td>
+            <td>Order #${log.order_id}</td>
+            <td>${log.action}</td>
+            <td><code>${log.ip_address}</code></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Load active orders (using simulation query endpoint since we want all orders to show up for demo)
+    // For demo, we will query from verification log or mock order endpoint.
+    // In our routes, we didn't add a global get-orders list. Let's make sure it is added, or query orders from database in backend.
+    // Let's add GET /orders to admin routes so boosters can see active orders! Yes, we need a list endpoint!
+    // We will query from GET /orders on admin panel.
+    async function loadOrders() {
+      try {
+        const res = await fetch('/orders', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const orders = await res.json();
+
+        const tbody = document.querySelector('#ordersTable tbody');
+        tbody.innerHTML = '';
+
+        orders.forEach(order => {
+          const tr = document.createElement('tr');
+          const isAssignedToMe = order.booster_id === currentUser.id;
+          const isAdmin = currentUser.role === 'admin' || currentUser.role === 'manager';
+
+          // Assign button html
+          let assignHtml = '';
+          if (isAdmin) {
+            let options = boostersList.map(b => `<option value="${b.id}" ${order.booster_id === b.id ? 'selected' : ''}>${b.username} (${b.active_jobs_count} İş)</option>`).join('');
+            assignHtml = `
+              <select onchange="reassignOrder(${order.id}, this.value)" style="padding: 4px; font-size: 0.8rem;">
+                <option value="">Ata...</option>
+                ${options}
+              </select>
+            `;
+          } else {
+            assignHtml = order.booster ? order.booster.username : 'Beklemede';
+          }
+
+          // Status action dropdown html (can update status and current rank)
+          let statusOptionsHtml = '';
+          if (isAssignedToMe || isAdmin) {
+            statusOptionsHtml = `
+              <select onchange="updateStatus(${order.id}, this.value)" style="padding: 4px; font-size: 0.8rem;">
+                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Kuyrukta</option>
+                <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Boost Yapılıyor</option>
+                <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Tamamlandı</option>
+                <option value="canceled" ${order.status === 'canceled' ? 'selected' : ''}>İptal Edildi</option>
+              </select>
+            `;
+          } else {
+            statusOptionsHtml = `<span class="badge bg-${order.status}">${order.status}</span>`;
+          }
+
+          // Show password button
+          let showCredentialsBtn = '';
+          if (order.customer_riot_password && (isAssignedToMe || isAdmin)) {
+            showCredentialsBtn = `<button class="btn btn-secondary btn-sm" onclick="viewCredentials(${order.id})">Şifre Gör</button>`;
+          } else if (!order.customer_riot_password) {
+            showCredentialsBtn = `<span style="font-size: 0.8rem; color: gray;">Şifre Silindi</span>`;
+          }
+
+          tr.innerHTML = `
+            <td>#${order.id}</td>
+            <td><strong>${order.customer_riot_id}</strong></td>
+            <td>${order.start_rank} ➜ ${order.current_rank || order.start_rank} ➜ ${order.target_rank}</td>
+            <td>${statusOptionsHtml}</td>
+            <td>${assignHtml}</td>
+            <td><div class="flex-row">${showCredentialsBtn}</div></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Actions
+    async function viewCredentials(orderId) {
+      try {
+        const res = await fetch(`/orders/${orderId}/credentials`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error);
+
+        document.getElementById('credArea').style.display = 'block';
+        document.getElementById('credUser').textContent = data.username;
+        document.getElementById('credPass').textContent = data.password;
+        
+        // Reload logs if admin
+        if (currentUser.role !== 'booster') loadAuditLogs();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    document.getElementById('btnCloseCreds').addEventListener('click', () => {
+      document.getElementById('credArea').style.display = 'none';
+    });
+
+    async function reassignOrder(orderId, boosterId) {
+      if (!boosterId) return;
+      try {
+        const res = await fetch(`/orders/${orderId}/reassign`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify({ booster_id: boosterId })
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error);
+        
+        alert('Booster başarıyla atandı.');
+        loadOrders();
+        loadAuditLogs();
+      } catch (err) {
+        alert(err.message);
+        loadOrders();
+      }
+    }
+
+    async function updateStatus(orderId, newStatus) {
+      let currentRankInput = null;
+      let currentKpInput = null;
+      
+      // If updating rank progress, optionally prompt (or just set status)
+      if (newStatus === 'processing') {
+        const rank = prompt("Güncel Rankı Güncellemek ister misiniz? (Boş bırakabilirsiniz):");
+        if (rank) {
+          currentRankInput = rank;
+          const kp = prompt("Güncel KP (0-100):");
+          if (kp) currentKpInput = kp;
+        }
+      }
+
+      try {
+        const res = await fetch(`/orders/${orderId}/status`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify({ 
+            status: newStatus,
+            current_rank: currentRankInput,
+            current_kp: currentKpInput
+          })
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error);
+        
+        loadOrders();
+        if (currentUser.role !== 'booster') loadAuditLogs();
+      } catch (err) {
+        alert(err.message);
+        loadOrders();
+      }
+    }
+
+    // Toggle start and target rank fields based on fixed rank setting
+    const keyFixedEl = document.getElementById('keyFixed');
+    const startRankGroup = document.getElementById('keyStartRank').closest('.form-group');
+    const targetRankGroup = document.getElementById('keyTargetRank').closest('.form-group');
+
+    function toggleRankFields() {
+      const isFixed = keyFixedEl.value === 'true';
+      if (isFixed) {
+        startRankGroup.style.display = 'flex';
+        targetRankGroup.style.display = 'flex';
+      } else {
+        startRankGroup.style.display = 'none';
+        targetRankGroup.style.display = 'none';
+        document.getElementById('keyStartRank').value = '';
+        document.getElementById('keyTargetRank').value = '';
+      }
+    }
+
+    // Bind change event and run initially
+    keyFixedEl.addEventListener('change', toggleRankFields);
+    toggleRankFields();
+
+    // Submit forms
+    const VALID_RANKS = [
+      'Demir 1', 'Demir 2', 'Demir 3',
+      'Bronz 1', 'Bronz 2', 'Bronz 3',
+      'Gümüş 1', 'Gümüş 2', 'Gümüş 3',
+      'Altın 1', 'Altın 2', 'Altın 3',
+      'Plat 1', 'Plat 2', 'Plat 3',
+      'Elmas 1', 'Elmas 2', 'Elmas 3',
+      'Yücelik 1', 'Yücelik 2', 'Yücelik 3',
+      'Immortal 1', 'Immortal 2', 'Immortal 3',
+      'Radyant'
+    ];
+
+    document.getElementById('btnGenKey').addEventListener('click', async () => {
+      const isFixed = keyFixedEl.value === 'true';
+      const startRankVal = document.getElementById('keyStartRank').value.trim();
+      const targetRankVal = document.getElementById('keyTargetRank').value.trim();
+
+      // If fixed, ensure both are valid selected/typed ranks
+      if (isFixed) {
+        if (!VALID_RANKS.includes(startRankVal)) {
+          alert('Lütfen başlangıç rankı için listeden geçerli bir rank seçiniz veya yazdığınız metni temizleyiniz.');
+          return;
+        }
+        if (!VALID_RANKS.includes(targetRankVal)) {
+          alert('Lütfen hedef rankı için listeden geçerli bir rank seçiniz veya yazdığınız metni temizleyiniz.');
+          return;
+        }
+      }
+
+      const payload = {
+        is_fixed_rank: isFixed,
+        start_rank: isFixed ? startRankVal : null,
+        target_rank: isFixed ? targetRankVal : null
+      };
+
+      try {
+        const res = await fetch('/keys', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error);
+
+        alert('Stok Kodu başarıyla oluşturuldu: ' + data.key.key_code);
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    document.getElementById('btnCreateUser').addEventListener('click', async () => {
+      const payload = {
+        username: document.getElementById('newUser').value.trim(),
+        email: document.getElementById('newEmail').value.trim(),
+        password: document.getElementById('newPass').value,
+        role: document.getElementById('newRole').value,
+        max_boost_rank: document.getElementById('newMaxRank').value.trim()
+      };
+
+      try {
+        const res = await fetch('/users', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error);
+
+        alert('Kullanıcı/Booster başarıyla oluşturuldu.');
+        document.getElementById('newUser').value = '';
+        document.getElementById('newEmail').value = '';
+        document.getElementById('newPass').value = '';
+        loadBoosters();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+  </script>
+</body>
+</html>
