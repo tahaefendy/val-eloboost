@@ -246,10 +246,9 @@ async function reassignOrder(req, res) {
     newBooster.active_jobs_count += 1;
     await newBooster.save({ transaction });
 
-    // Log the reassignment
     await BoosterLog.create({
       order_id: order.id,
-      booster_id: req.user.id, // Who did the assignment
+      booster_id: req.user.id === 0 ? null : req.user.id, // Who did the assignment
       action: `Sipariş manuel olarak '${newBooster.username}' boosterına atandı.`,
       ip_address: req.ip
     }, { transaction });
@@ -293,7 +292,7 @@ async function getOrderCredentials(req, res) {
     // Audit log
     await BoosterLog.create({
       order_id: order.id,
-      booster_id: req.user.id,
+      booster_id: req.user.id === 0 ? null : req.user.id,
       action: `Hesap şifresi görüntülendi.`,
       ip_address: req.ip
     });
@@ -369,7 +368,7 @@ async function updateOrderStatus(req, res) {
     // Audit log
     await BoosterLog.create({
       order_id: order.id,
-      booster_id: req.user.id,
+      booster_id: req.user.id === 0 ? null : req.user.id,
       action: `Sipariş güncellendi: Durum = ${status || oldStatus}, Rank = ${order.current_rank}, KP = ${order.current_kp}`,
       ip_address: req.ip
     }, { transaction });
