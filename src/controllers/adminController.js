@@ -86,31 +86,42 @@ async function createUser(req, res) {
  * Deletes a user (booster/manager). (Admin/Manager only)
  */
 async function deleteUser(req, res) {
+  const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
 
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, { transaction });
     if (!user) {
+      await transaction.rollback();
       return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
     }
 
     if (user.role === 'admin') {
+      await transaction.rollback();
       return res.status(400).json({ error: 'Yönetici hesapları silinemez.' });
     }
     if (user.id === req.user.id) {
+      await transaction.rollback();
       return res.status(400).json({ error: 'Kendi hesabınızı silemezsiniz.' });
     }
 
     if (user.active_jobs_count > 0) {
+      await transaction.rollback();
       return res.status(400).json({
         error: `Bu booster'ın aktif ${user.active_jobs_count} siparişi bulunuyor. Silmeden önce siparişleri başka bir booster'a atamalısınız.`
       });
     }
 
-    await user.destroy();
+    // Programmatically clear references in orders and logs to avoid foreign key violations
+    await Order.update({ booster_id: null }, { where: { booster_id: user.id }, transaction });
+    await BoosterLog.update({ booster_id: null }, { where: { booster_id: user.id }, transaction });
 
+    await user.destroy({ transaction });
+
+    await transaction.commit();
     return res.json({ message: 'Kullanıcı başarıyla silindi.' });
   } catch (error) {
+    await transaction.rollback();
     console.error('DeleteUser Error:', error);
     return res.status(500).json({ error: 'Kullanıcı silinirken bir hata oluştu.' });
   }
