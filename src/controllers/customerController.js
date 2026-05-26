@@ -81,6 +81,20 @@ async function createOrder(req, res) {
       }
     }
 
+    // Fetch current rank from API right away if possible
+    let finalCurrentRank = finalStartRank;
+    let finalCurrentKp = 0;
+    let liveData = null;
+    try {
+        liveData = await getLiveMmr(region || 'eu', customer_riot_id.trim());
+        if (liveData && liveData.current_rank) {
+            finalCurrentRank = translateEnglishRankToTurkish(liveData.current_rank);
+            finalCurrentKp = liveData.current_kp;
+        }
+    } catch (apiErr) {
+        console.error("Henrik API İlk Çekim Hatası:", apiErr.message);
+    }
+
     // 3. Encrypt the password
     const encryptedPassword = encrypt(customer_riot_password);
 
@@ -92,10 +106,12 @@ async function createOrder(req, res) {
       customer_riot_password: encryptedPassword,
       start_rank: finalStartRank,
       target_rank: finalTargetRank,
-      current_rank: finalStartRank, // Starts as start_rank
-      current_kp: 0,
+      current_rank: finalCurrentRank, // Set from API
+      current_kp: finalCurrentKp,
       status: 'pending',
-      progress_percentage: 0.0
+      progress_percentage: 0.0,
+      last_api_check: liveData ? new Date() : null,
+      api_cache_data: liveData ? JSON.stringify(liveData.raw) : null
     }, { transaction });
 
     // 5. Mark the key as used
@@ -139,8 +155,8 @@ async function trackOrder(req, res) {
 
     let updateSource = 'cache';
 
-    // Only update MMR live from API if the order is currently being processed
-    if (order.status === 'processing' && (!lastCheck || (now - new Date(lastCheck)) > cacheDurationMs)) {
+    // Only update MMR live from API if the order is not completed
+    if (order.status !== 'completed' && (!lastCheck || (now - new Date(lastCheck)) > cacheDurationMs)) {
       try {
         const liveData = await getLiveMmr(region || 'eu', order.customer_riot_id);
         
