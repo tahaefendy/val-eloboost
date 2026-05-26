@@ -43,7 +43,7 @@ app.use((req, res, next) => {
 
 // Routing based on subdomain detector or path checks
 app.use((req, res, next) => {
-  const adminPaths = ['/keys', '/users', '/boosters', '/audit-logs'];
+  const adminPaths = ['/keys', '/users', '/boosters', '/audit-logs', '/orders'];
   const isAdminPath = adminPaths.some(p => req.path.startsWith(p));
 
   if (req.isSiteAdmin || isAdminPath) {
