@@ -27,6 +27,7 @@ router.use(requireRole('admin', 'manager'));
 
 // User creation
 router.post('/users', adminController.createUser);
+router.delete('/users/:id', adminController.deleteUser);
 
 // Create stock keys
 router.post('/keys', adminController.createStockKey);

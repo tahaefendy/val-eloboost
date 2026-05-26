@@ -83,6 +83,40 @@ async function createUser(req, res) {
 }
 
 /**
+ * Deletes a user (booster/manager). (Admin/Manager only)
+ */
+async function deleteUser(req, res) {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+    }
+
+    if (user.role === 'admin') {
+      return res.status(400).json({ error: 'Yönetici hesapları silinemez.' });
+    }
+    if (user.id === req.user.id) {
+      return res.status(400).json({ error: 'Kendi hesabınızı silemezsiniz.' });
+    }
+
+    if (user.active_jobs_count > 0) {
+      return res.status(400).json({
+        error: `Bu booster'ın aktif ${user.active_jobs_count} siparişi bulunuyor. Silmeden önce siparişleri başka bir booster'a atamalısınız.`
+      });
+    }
+
+    await user.destroy();
+
+    return res.json({ message: 'Kullanıcı başarıyla silindi.' });
+  } catch (error) {
+    console.error('DeleteUser Error:', error);
+    return res.status(500).json({ error: 'Kullanıcı silinirken bir hata oluştu.' });
+  }
+}
+
+/**
  * Generates a random secure stock key code (e.g. VAL-KEY-ABCD-1234)
  */
 function generateRandomKey() {
@@ -388,5 +422,6 @@ module.exports = {
   getOrderCredentials,
   updateOrderStatus,
   getAuditLogs,
-  getOrders
+  getOrders,
+  deleteUser
 };
