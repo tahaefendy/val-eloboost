@@ -112,9 +112,9 @@ async function deleteUser(req, res) {
       });
     }
 
-    // Programmatically clear references in orders and logs to avoid foreign key violations
+    // Programmatically clear references in orders and delete logs to avoid foreign key violations
     await Order.update({ booster_id: null }, { where: { booster_id: user.id }, transaction });
-    await BoosterLog.update({ booster_id: null }, { where: { booster_id: user.id }, transaction });
+    await BoosterLog.destroy({ where: { booster_id: user.id }, transaction });
 
     await user.destroy({ transaction });
 
