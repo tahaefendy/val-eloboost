@@ -149,7 +149,7 @@ async function trackOrder(req, res) {
       return res.status(404).json({ error: 'Sipariş bulunamadı.' });
     }
 
-    const cacheDurationMs = 15 * 60 * 1000; // 15 minutes
+    const cacheDurationMs = 30 * 60 * 1000; // 30 minutes
     const now = new Date();
     const lastCheck = order.last_api_check;
 
