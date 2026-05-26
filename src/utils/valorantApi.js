@@ -48,8 +48,8 @@ function fetchMmrFromApi(region, riotId) {
 
           if (res.statusCode === 200 && parsed.status === 200 && parsed.data) {
             resolve({
-              current_rank: parsed.data.currenttierstring || 'Unranked',
-              current_kp: parsed.data.ranking_in_tier || 0,
+              current_rank: (parsed.data.current_data && parsed.data.current_data.currenttierpatched) ? parsed.data.current_data.currenttierpatched : 'Unranked',
+              current_kp: (parsed.data.current_data && parsed.data.current_data.ranking_in_tier) ? parsed.data.current_data.ranking_in_tier : 0,
               raw: parsed.data
             });
           } else {
