@@ -171,19 +171,26 @@ async function listBoosters(req, res) {
   try {
     const boosters = await User.findAll({
       where: { role: 'booster' },
-      attributes: [
-        'id', 'username', 'email', 'max_boost_rank',
-        [
-          sequelize.literal(`(
-            SELECT COUNT(*)
-            FROM Orders AS o
-            WHERE o.booster_id = User.id AND o.status IN ('pending', 'processing')
-          )`),
-          'active_jobs_count'
-        ]
-      ]
+      attributes: ['id', 'username', 'email', 'max_boost_rank']
     });
-    return res.json(boosters);
+
+    const activeOrders = await Order.findAll({
+      where: { status: ['pending', 'processing'] },
+      attributes: ['booster_id']
+    });
+
+    const boostersWithCounts = boosters.map(booster => {
+      const count = activeOrders.filter(o => o.booster_id === booster.id).length;
+      return {
+        id: booster.id,
+        username: booster.username,
+        email: booster.email,
+        max_boost_rank: booster.max_boost_rank,
+        active_jobs_count: count
+      };
+    });
+
+    return res.json(boostersWithCounts);
   } catch (error) {
     console.error('ListBoosters Error:', error);
     return res.status(500).json({ error: 'Booster listesi alınamadı.' });
