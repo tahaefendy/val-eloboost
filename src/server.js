@@ -43,8 +43,19 @@ app.use((req, res, next) => {
 
 // Routing based on subdomain detector or path checks
 app.use((req, res, next) => {
-  const adminPaths = ['/keys', '/users', '/boosters', '/audit-logs', '/orders'];
-  const isAdminPath = adminPaths.some(p => req.path.startsWith(p));
+  const adminPaths = ['/keys', '/users', '/boosters', '/audit-logs'];
+  let isAdminPath = adminPaths.some(p => req.path.startsWith(p));
+
+  // Precise routing for orders: list, credentials, status and reassign are admin-only,
+  // while /orders/:id tracking belongs to the customer router.
+  if (req.path === '/orders' || req.path === '/orders/') {
+    isAdminPath = true;
+  } else if (req.path.startsWith('/orders/')) {
+    const isSubAction = req.path.endsWith('/credentials') || req.path.endsWith('/status') || req.path.endsWith('/reassign');
+    if (isSubAction) {
+      isAdminPath = true;
+    }
+  }
 
   if (req.isSiteAdmin || isAdminPath) {
     // Forward to administrative routes
