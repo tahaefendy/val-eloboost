@@ -123,7 +123,11 @@ async function deleteUser(req, res) {
   } catch (error) {
     await transaction.rollback();
     console.error('DeleteUser Error:', error);
-    return res.status(500).json({ error: 'Kullanıcı silinirken bir hata oluştu.' });
+    return res.status(500).json({ 
+      error: 'Kullanıcı silinirken bir hata oluştu.',
+      message: error.message,
+      stack: error.stack
+    });
   }
 }
 
