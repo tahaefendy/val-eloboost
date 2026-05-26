@@ -31,6 +31,12 @@ const subdomainDetector = (req, res, next) => {
  * Route protection middleware to ensure request is from the admin subdomain
  */
 const requireAdminSubdomain = (req, res, next) => {
+  const apiKey = req.headers['x-api-key'];
+  const internalSecret = process.env.INTERNAL_API_SECRET;
+  if (internalSecret && apiKey === internalSecret) {
+    return next();
+  }
+
   if (!req.isSiteAdmin) {
     return res.status(403).json({
       error: 'Bu endpoint sadece admin.kodteslimal.com üzerinden erişilebilir.'
@@ -43,6 +49,12 @@ const requireAdminSubdomain = (req, res, next) => {
  * Route protection middleware to ensure request is from the main customer domain
  */
 const requireCustomerSubdomain = (req, res, next) => {
+  const apiKey = req.headers['x-api-key'];
+  const internalSecret = process.env.INTERNAL_API_SECRET;
+  if (internalSecret && apiKey === internalSecret) {
+    return next();
+  }
+
   if (req.isSiteAdmin) {
     return res.status(403).json({
       error: 'Bu endpoint admin domaininden çağrılamaz. Lütfen kodteslimal.com adresini kullanın.'

@@ -92,18 +92,27 @@ function generateRandomKey() {
 }
 
 /**
- * Creates stock key codes with automated key code generation (Admin/Manager only)
+ * Creates stock key codes (Admin/Manager only)
  */
 async function createStockKey(req, res) {
   try {
-    const { is_fixed_rank, start_rank, target_rank } = req.body;
+    const { key_code: req_key_code, is_fixed_rank, start_rank, target_rank } = req.body;
 
-    // Automatically generate unique key code
-    let key_code = generateRandomKey();
-    let keyExists = await StockKey.findOne({ where: { key_code } });
-    while (keyExists) {
+    let key_code = req_key_code;
+    if (!key_code) {
+      // Automatically generate unique key code
       key_code = generateRandomKey();
-      keyExists = await StockKey.findOne({ where: { key_code } });
+      let keyExists = await StockKey.findOne({ where: { key_code } });
+      while (keyExists) {
+        key_code = generateRandomKey();
+        keyExists = await StockKey.findOne({ where: { key_code } });
+      }
+    } else {
+      // Check if custom key code exists
+      const keyExists = await StockKey.findOne({ where: { key_code } });
+      if (keyExists) {
+        return res.status(400).json({ error: 'Stok kodu zaten mevcut.' });
+      }
     }
 
     const key = await StockKey.create({
