@@ -98,6 +98,14 @@ async function createOrder(req, res) {
     // 3. Encrypt the password
     const encryptedPassword = encrypt(customer_riot_password);
 
+    // Calculate initial progress percentage
+    const initialProgress = calculateProgress(
+      finalStartRank,
+      finalTargetRank,
+      finalCurrentRank,
+      finalCurrentKp
+    );
+
     // 4. Create the Order
     const order = await Order.create({
       stock_key_id: key.id,
@@ -109,7 +117,7 @@ async function createOrder(req, res) {
       current_rank: finalCurrentRank, // Set from API
       current_kp: finalCurrentKp,
       status: 'pending',
-      progress_percentage: 0.0,
+      progress_percentage: initialProgress,
       last_api_check: liveData ? new Date() : null,
       api_cache_data: liveData ? JSON.stringify(liveData.raw) : null
     }, { transaction });

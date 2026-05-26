@@ -81,14 +81,17 @@ function fetchMmrFromApi(region, riotId) {
 async function getLiveMmr(region, riotId) {
   if (!HENRIK_API_KEY) {
     console.warn('Henrik API Key bulunamadı (.env dosyasında HENRIK_API_KEY boş). Test amaçlı simüle veriler üretiliyor.');
-    // Simulated updates for testing without real keys
-    const mockRanks = ['Bronze 2', 'Bronze 3', 'Silver 1', 'Silver 2', 'Silver 3', 'Gold 1'];
-    const randomRank = mockRanks[Math.floor(Math.random() * mockRanks.length)];
-    const randomKp = Math.floor(Math.random() * 100);
+    // Simulated stable updates for testing without real keys
+    const mockRanks = ['Iron 2', 'Iron 3', 'Bronze 1', 'Bronze 2', 'Bronze 3', 'Silver 1', 'Silver 2', 'Silver 3', 'Gold 1'];
+    // Generate a stable index using the sum of character codes of the riotId
+    const charCodeSum = riotId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const stableIndex = Math.abs(charCodeSum) % mockRanks.length;
+    const stableRank = mockRanks[stableIndex];
+    const stableKp = 50; // Stable rating within tier
 
     return {
-      current_rank: randomRank,
-      current_kp: randomKp,
+      current_rank: stableRank,
+      current_kp: stableKp,
       raw: { simulated: true, region, riotId }
     };
   }
