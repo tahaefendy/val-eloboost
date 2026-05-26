@@ -396,7 +396,11 @@ async function updateOrderStatus(req, res) {
   } catch (error) {
     await transaction.rollback();
     console.error('UpdateOrderStatus Error:', error);
-    return res.status(500).json({ error: 'Sipariş güncellenemedi.' });
+    return res.status(500).json({ 
+      error: 'Sipariş güncellenemedi.', 
+      message: error.message, 
+      stack: error.stack 
+    });
   }
 }
 
