@@ -49,7 +49,7 @@ async function verifyKey(req, res) {
 async function createOrder(req, res) {
   const transaction = await sequelize.transaction();
   try {
-    const { key_code, customer_riot_id, customer_riot_username, customer_riot_password, start_rank, target_rank } = req.body;
+    const { key_code, customer_riot_id, customer_riot_username, customer_riot_password, start_rank, target_rank, region } = req.body;
 
     if (!key_code || !customer_riot_id || !customer_riot_username || !customer_riot_password) {
       await transaction.rollback();
