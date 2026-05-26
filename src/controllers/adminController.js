@@ -167,14 +167,21 @@ async function createStockKey(req, res) {
   }
 }
 
-/**
- * Lists boosters for reassignment dropdown list (Admin/Manager only)
- */
 async function listBoosters(req, res) {
   try {
     const boosters = await User.findAll({
       where: { role: 'booster' },
-      attributes: ['id', 'username', 'email', 'max_boost_rank', 'active_jobs_count']
+      attributes: [
+        'id', 'username', 'email', 'max_boost_rank',
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM Orders AS o
+            WHERE o.booster_id = User.id AND o.status IN ('pending', 'processing')
+          )`),
+          'active_jobs_count'
+        ]
+      ]
     });
     return res.json(boosters);
   } catch (error) {
