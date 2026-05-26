@@ -40,7 +40,8 @@ function translateEnglishRankToTurkish(englishRank) {
  */
 function getRankWeight(rankName) {
   if (!rankName) return 0;
-  const index = VALORANT_RANKS.findIndex(r => r.toLowerCase() === rankName.toLowerCase().trim());
+  const translated = translateEnglishRankToTurkish(rankName);
+  const index = VALORANT_RANKS.findIndex(r => r.toLowerCase() === translated.toLowerCase().trim());
   return index === -1 ? 0 : index;
 }
 
