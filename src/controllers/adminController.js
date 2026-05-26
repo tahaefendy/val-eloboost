@@ -246,9 +246,15 @@ async function reassignOrder(req, res) {
     newBooster.active_jobs_count += 1;
     await newBooster.save({ transaction });
 
+    let logBoosterId = req.user.id;
+    if (logBoosterId === 0) {
+      const defaultUser = await User.findOne({ where: { role: 'admin' }, transaction }) || await User.findOne({ transaction });
+      logBoosterId = defaultUser ? defaultUser.id : null;
+    }
+
     await BoosterLog.create({
       order_id: order.id,
-      booster_id: req.user.id === 0 ? null : req.user.id, // Who did the assignment
+      booster_id: logBoosterId, // Who did the assignment
       action: `Sipariş manuel olarak '${newBooster.username}' boosterına atandı.`,
       ip_address: req.ip
     }, { transaction });
@@ -289,10 +295,16 @@ async function getOrderCredentials(req, res) {
 
     const decryptedPassword = decrypt(order.customer_riot_password);
 
+    let logBoosterId = req.user.id;
+    if (logBoosterId === 0) {
+      const defaultUser = await User.findOne({ where: { role: 'admin' } }) || await User.findOne();
+      logBoosterId = defaultUser ? defaultUser.id : null;
+    }
+
     // Audit log
     await BoosterLog.create({
       order_id: order.id,
-      booster_id: req.user.id === 0 ? null : req.user.id,
+      booster_id: logBoosterId,
       action: `Hesap şifresi görüntülendi.`,
       ip_address: req.ip
     });
@@ -365,10 +377,16 @@ async function updateOrderStatus(req, res) {
 
     await order.save({ transaction });
 
+    let logBoosterId = req.user.id;
+    if (logBoosterId === 0) {
+      const defaultUser = await User.findOne({ where: { role: 'admin' }, transaction }) || await User.findOne({ transaction });
+      logBoosterId = defaultUser ? defaultUser.id : null;
+    }
+
     // Audit log
     await BoosterLog.create({
       order_id: order.id,
-      booster_id: req.user.id === 0 ? null : req.user.id,
+      booster_id: logBoosterId,
       action: `Sipariş güncellendi: Durum = ${status || oldStatus}, Rank = ${order.current_rank}, KP = ${order.current_kp}`,
       ip_address: req.ip
     }, { transaction });
