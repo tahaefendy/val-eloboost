@@ -36,6 +36,7 @@ router.post('/keys', adminController.createStockKey);
 router.get('/boosters', adminController.listBoosters);
 
 // Reassign order manually
+router.post('/orders/:id/reassign', adminController.reassignOrder);
 router.put('/orders/:id/reassign', adminController.reassignOrder);
 
 // Audit logs

@@ -157,6 +157,11 @@ async function trackOrder(req, res) {
       return res.status(404).json({ error: 'Sipariş bulunamadı.' });
     }
 
+    const apiKey = req.headers['x-api-key'];
+    const internalSecret = process.env.INTERNAL_API_SECRET || 'A8cT3xK5vG9mB1zY7qJ0wP2rL4nS6dF8hG0vW5mN3zK6pY1tB4cR7qJ2sV8aD9fE';
+    const isInternal = internalSecret && apiKey === internalSecret;
+    const forceRefresh = req.query.force === 'true' && isInternal;
+
     const cacheDurationMs = 30 * 60 * 1000; // 30 minutes
     const now = new Date();
     const lastCheck = order.last_api_check;
@@ -164,7 +169,7 @@ async function trackOrder(req, res) {
     let updateSource = 'cache';
 
     // Only update MMR live from API if the order is not completed
-    if (order.status !== 'completed' && (!lastCheck || (now - new Date(lastCheck)) > cacheDurationMs)) {
+    if (order.status !== 'completed' && (forceRefresh || !lastCheck || (now - new Date(lastCheck)) > cacheDurationMs)) {
       try {
         const liveData = await getLiveMmr(region || 'eu', order.customer_riot_id);
         
