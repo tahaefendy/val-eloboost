@@ -342,7 +342,7 @@ async function updateOrderStatus(req, res) {
   const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
-    const { status, current_rank, current_kp } = req.body;
+    const { status, current_rank, current_kp, target_rank, start_rank, customer_riot_username, region } = req.body;
 
     const order = await Order.findByPk(id, { transaction });
     if (!order) {
@@ -363,6 +363,10 @@ async function updateOrderStatus(req, res) {
 
     if (current_rank) order.current_rank = current_rank;
     if (current_kp !== undefined) order.current_kp = Number(current_kp);
+    if (target_rank) order.target_rank = target_rank;
+    if (start_rank) order.start_rank = start_rank;
+    if (customer_riot_username) order.customer_riot_username = customer_riot_username;
+    if (region) order.region = region;
 
     if (status && status !== oldStatus) {
       order.status = status;
