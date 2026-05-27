@@ -81,8 +81,12 @@ async function startServer() {
     await sequelize.authenticate();
     console.log('Veritabanı bağlantısı başarılı.');
 
-    await sequelize.sync({ alter: true });
-    console.log('Veritabanı tabloları senkronize edildi.');
+    try {
+      await sequelize.sync({ alter: true });
+      console.log('Veritabanı tabloları senkronize edildi.');
+    } catch (syncError) {
+      console.error('Veritabanı senkronizasyon hatası (sunucu başlatılmaya devam ediliyor):', syncError);
+    }
 
     app.listen(PORT, () => {
       console.log(`Sunucu ${PORT} portunda çalışıyor.`);
