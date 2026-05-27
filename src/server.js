@@ -67,6 +67,14 @@ app.use((req, res, next) => {
 });
 
 // Global Error Handler
+app.get('/health', (req, res) => {
+  const dbError = app.get('db_error');
+  if (dbError) {
+    return res.status(500).json({ status: 'error', database: 'disconnected', error: dbError });
+  }
+  return res.json({ status: 'ok', database: 'connected' });
+});
+
 app.use((err, req, res, next) => {
   console.error('Unhandled Error:', err.message);
   res.status(err.status || 500).json({
@@ -76,27 +84,26 @@ app.use((err, req, res, next) => {
 
 // Database synchronization and server launch
 async function startServer() {
-  try {
-    // Sync models with Database (alter structure for development/demo safety)
-    await sequelize.authenticate();
-    console.log('Veritabanı bağlantısı başarılı.');
+  app.listen(PORT, async () => {
+    console.log(`Sunucu ${PORT} portunda çalışıyor.`);
+    console.log(`Müşteri Domaini: http://localhost:${PORT} veya http://kodteslimal.com`);
+    console.log(`Yönetim Domaini: http://admin.localhost:${PORT} veya http://admin.kodteslimal.com`);
 
     try {
-      await sequelize.sync({ alter: true });
-      console.log('Veritabanı tabloları senkronize edildi.');
-    } catch (syncError) {
-      console.error('Veritabanı senkronizasyon hatası (sunucu başlatılmaya devam ediliyor):', syncError);
-    }
+      await sequelize.authenticate();
+      console.log('Veritabanı bağlantısı başarılı.');
 
-    app.listen(PORT, () => {
-      console.log(`Sunucu ${PORT} portunda çalışıyor.`);
-      console.log(`Müşteri Domaini: http://localhost:${PORT} veya http://kodteslimal.com`);
-      console.log(`Yönetim Domaini: http://admin.localhost:${PORT} veya http://admin.kodteslimal.com`);
-    });
-  } catch (error) {
-    console.error('Sunucu başlatılamadı:', error);
-    process.exit(1);
-  }
+      try {
+        await sequelize.sync({ alter: true });
+        console.log('Veritabanı tabloları senkronize edildi.');
+      } catch (syncError) {
+        console.error('Veritabanı senkronizasyon hatası:', syncError);
+      }
+    } catch (dbError) {
+      console.error('Veritabanı bağlantı hatası:', dbError);
+      app.set('db_error', dbError.message || dbError.toString());
+    }
+  });
 }
 
 // Check if run directly (not imported in tests)
