@@ -233,14 +233,6 @@ async function reassignOrder(req, res) {
       return res.status(400).json({ error: 'Geçersiz booster ID.' });
     }
 
-    // Check if booster is capable of playing target_rank
-    if (!isRankHigherOrEqual(newBooster.max_boost_rank, order.target_rank)) {
-      await transaction.rollback();
-      return res.status(400).json({
-        error: `Bu booster'ın yetkinliği (${newBooster.max_boost_rank}) bu hedef rank (${order.target_rank}) için yeterli değil.`
-      });
-    }
-
     const oldBoosterId = order.booster_id;
 
     // Update old booster jobs count if it was active
