@@ -186,7 +186,7 @@ async function listBoosters(req, res) {
   try {
     const boosters = await User.findAll({
       where: { role: 'booster' },
-      attributes: ['id', 'username', 'email', 'max_boost_rank']
+      attributes: ['id', 'username', 'email', 'max_boost_rank', 'is_active']
     });
 
     const activeOrders = await Order.findAll({
@@ -201,6 +201,7 @@ async function listBoosters(req, res) {
         username: booster.username,
         email: booster.email,
         max_boost_rank: booster.max_boost_rank,
+        is_active: booster.is_active,
         active_jobs_count: count
       };
     });
@@ -459,6 +460,92 @@ async function getOrders(req, res) {
   }
 }
 
+/**
+ * Update user fields (like active/inactive status, max_boost_rank)
+ */
+async function updateUser(req, res) {
+  try {
+    const { id } = req.params;
+    const { is_active, max_boost_rank } = req.body;
+    
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+    }
+
+    if (is_active !== undefined) {
+      user.is_active = !!is_active;
+    }
+    if (max_boost_rank !== undefined) {
+      user.max_boost_rank = max_boost_rank;
+    }
+
+    await user.save();
+    return res.json({ message: 'Kullanıcı başarıyla güncellendi.', user });
+  } catch (error) {
+    console.error('UpdateUser Error:', error);
+    return res.status(500).json({ error: 'Kullanıcı güncellenemedi.' });
+  }
+}
+
+/**
+ * Bulk cancel selected orders
+ */
+async function bulkCancelOrders(req, res) {
+  const transaction = await sequelize.transaction();
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      await transaction.rollback();
+      return res.status(400).json({ error: 'Eksik veya geçersiz sipariş ID listesi.' });
+    }
+
+    const orders = await Order.findAll({
+      where: { id: ids },
+      transaction
+    });
+
+    for (const order of orders) {
+      const oldStatus = order.status;
+      if (oldStatus !== 'canceled' && oldStatus !== 'completed') {
+        order.status = 'canceled';
+        order.customer_riot_password = null;
+        await order.save({ transaction });
+
+        // Decrement booster active job count if assigned
+        if (order.booster_id) {
+          const booster = await User.findByPk(order.booster_id, { transaction });
+          if (booster && booster.active_jobs_count > 0) {
+            booster.active_jobs_count -= 1;
+            await booster.save({ transaction });
+          }
+        }
+
+        // Audit log
+        let logBoosterId = req.user.id;
+        if (logBoosterId === 0) {
+          const defaultUser = await User.findOne({ where: { role: 'admin' }, transaction }) || await User.findOne({ transaction });
+          logBoosterId = defaultUser ? defaultUser.id : null;
+        }
+
+        await BoosterLog.create({
+          order_id: order.id,
+          booster_id: logBoosterId,
+          action: `Sipariş toplu işlemle iptal edildi.`,
+          ip_address: req.ip
+        }, { transaction });
+      }
+    }
+
+    await transaction.commit();
+    return res.json({ message: `${orders.length} sipariş başarıyla iptal edildi.` });
+  } catch (error) {
+    await transaction.rollback();
+    console.error('BulkCancelOrders Error:', error);
+    return res.status(500).json({ error: 'Toplu iptal işlemi başarısız oldu.' });
+  }
+}
+
 module.exports = {
   login,
   createUser,
@@ -469,5 +556,7 @@ module.exports = {
   updateOrderStatus,
   getAuditLogs,
   getOrders,
-  deleteUser
+  deleteUser,
+  updateUser,
+  bulkCancelOrders
 };

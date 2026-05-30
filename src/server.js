@@ -51,7 +51,7 @@ app.use((req, res, next) => {
   if (req.path === '/orders' || req.path === '/orders/') {
     isAdminPath = true;
   } else if (req.path.startsWith('/orders/')) {
-    const isSubAction = req.path.endsWith('/credentials') || req.path.endsWith('/status') || req.path.endsWith('/reassign');
+    const isSubAction = req.path.endsWith('/credentials') || req.path.endsWith('/status') || req.path.endsWith('/reassign') || req.path.endsWith('/bulk-cancel');
     if (isSubAction) {
       isAdminPath = true;
     }

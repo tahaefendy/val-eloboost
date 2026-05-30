@@ -25,8 +25,9 @@ router.get('/orders', adminController.getOrders);
 // Admin & Manager ONLY endpoints
 router.use(requireRole('admin', 'manager'));
 
-// User creation
+// User creation & update
 router.post('/users', adminController.createUser);
+router.put('/users/:id', adminController.updateUser);
 router.delete('/users/:id', adminController.deleteUser);
 
 // Create stock keys
@@ -34,6 +35,9 @@ router.post('/keys', adminController.createStockKey);
 
 // List boosters for dropdown selection
 router.get('/boosters', adminController.listBoosters);
+
+// Bulk cancel orders
+router.post('/orders/bulk-cancel', adminController.bulkCancelOrders);
 
 // Reassign order manually
 router.post('/orders/:id/reassign', adminController.reassignOrder);

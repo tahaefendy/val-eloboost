@@ -12,7 +12,8 @@ async function autoAssignOrder(order, transaction = null) {
     // 1. Get all boosters
     const boosters = await User.findAll({
       where: {
-        role: 'booster'
+        role: 'booster',
+        is_active: true
       },
       transaction
     });
