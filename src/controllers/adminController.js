@@ -4,6 +4,7 @@ const { isRankHigherOrEqual, calculateProgress } = require('../utils/rankHelper'
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const sequelize = require('../config/database');
+const { Op } = require('sequelize');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwttokenkey123!';
 
@@ -449,7 +450,10 @@ async function getOrders(req, res) {
     };
 
     if (isBooster) {
-      queryOptions.where = { booster_id: req.user.id };
+      queryOptions.where = {
+        booster_id: req.user.id,
+        status: { [Op.ne]: 'canceled' }
+      };
     }
 
     const orders = await Order.findAll(queryOptions);
