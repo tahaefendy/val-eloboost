@@ -26,7 +26,7 @@ app.use((req, res, next) => {
   const apiPaths = [
     '/verify-key', '/create-order', '/orders', 
     '/login', '/users', '/keys', 
-    '/boosters', '/audit-logs'
+    '/boosters', '/audit-logs', '/debug-git'
   ];
   
   const isApi = apiPaths.some(p => req.path.startsWith(p));
