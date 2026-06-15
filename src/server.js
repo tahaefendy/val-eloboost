@@ -43,7 +43,7 @@ app.use((req, res, next) => {
 
 // Routing based on subdomain detector or path checks
 app.use((req, res, next) => {
-  const adminPaths = ['/keys', '/users', '/boosters', '/audit-logs'];
+  const adminPaths = ['/login', '/keys', '/users', '/boosters', '/audit-logs'];
   let isAdminPath = adminPaths.some(p => req.path.startsWith(p));
 
   // Precise routing for orders: list, credentials, status and reassign are admin-only,
