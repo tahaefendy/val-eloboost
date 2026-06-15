@@ -8,20 +8,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwttokenkey123!';
  * Authentication middleware to verify JWT
  */
 const authenticateToken = async (req, res, next) => {
-  // Check for Server-to-Server Internal API Secret
-  const apiKey = req.headers['x-api-key'];
-  const internalSecret = process.env.INTERNAL_API_SECRET || 'A8cT3xK5vG9mB1zY7qJ0wP2rL4nS6dF8hG0vW5mN3zK6pY1tB4cR7qJ2sV8aD9fE';
-  if (internalSecret && apiKey === internalSecret) {
-    req.user = {
-      id: 0,
-      username: 'internal_api',
-      role: 'admin',
-      max_boost_rank: 'Radiant',
-      active_jobs_count: 0
-    };
-    return next();
-  }
-
   const authHeader = req.headers['authorization'];
   // Accept token from Bearer header or cookies
   let token = authHeader && authHeader.split(' ')[1];
@@ -30,7 +16,20 @@ const authenticateToken = async (req, res, next) => {
     token = req.cookies.admin_token;
   }
 
+  // Check for Server-to-Server Internal API Secret only if JWT token is not present
   if (!token) {
+    const apiKey = req.headers['x-api-key'];
+    const internalSecret = process.env.INTERNAL_API_SECRET || 'A8cT3xK5vG9mB1zY7qJ0wP2rL4nS6dF8hG0vW5mN3zK6pY1tB4cR7qJ2sV8aD9fE';
+    if (internalSecret && apiKey === internalSecret) {
+      req.user = {
+        id: 0,
+        username: 'internal_api',
+        role: 'admin',
+        max_boost_rank: 'Radiant',
+        active_jobs_count: 0
+      };
+      return next();
+    }
     return res.status(401).json({ error: 'Erişim engellendi. Token bulunamadı.' });
   }
 
