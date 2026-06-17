@@ -88,7 +88,7 @@ async function createOrder(req, res) {
     try {
         liveData = await getLiveMmr(region || 'eu', customer_riot_id.trim());
         if (liveData && liveData.current_rank) {
-            finalCurrentRank = translateEnglishRankToTurkish(liveData.current_rank);
+            finalCurrentRank = translateEnglishRankToTurkish(liveData.current_rank, liveData.current_kp);
             finalCurrentKp = liveData.current_kp;
         }
     } catch (apiErr) {
@@ -181,7 +181,7 @@ async function trackOrder(req, res) {
       try {
         const liveData = await getLiveMmr(region || 'eu', order.customer_riot_id);
         
-        order.current_rank = translateEnglishRankToTurkish(liveData.current_rank);
+        order.current_rank = translateEnglishRankToTurkish(liveData.current_rank, liveData.current_kp);
         order.current_kp = liveData.current_kp;
         order.last_api_check = now;
         order.api_cache_data = JSON.stringify(liveData.raw);

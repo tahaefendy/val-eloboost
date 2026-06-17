@@ -96,6 +96,20 @@ async function startServer() {
       try {
         await sequelize.sync({ alter: true });
         console.log('Veritabanı tabloları senkronize edildi.');
+
+        // Update f4ld3x competency limit to Gold 3
+        try {
+          const { User } = require('./models');
+          const [updatedCount] = await User.update(
+            { max_boost_rank: 'Gold 3' },
+            { where: { username: 'f4ld3x' } }
+          );
+          if (updatedCount > 0) {
+            console.log("Database Startup: f4ld3x kullanıcısının Max Yetkinlik derecesi Gold 3'e düşürüldü.");
+          }
+        } catch (updateErr) {
+          console.error("f4ld3x yetkinlik derecesi güncellenirken hata oluştu:", updateErr.message);
+        }
       } catch (syncError) {
         console.error('Veritabanı senkronizasyon hatası:', syncError);
       }

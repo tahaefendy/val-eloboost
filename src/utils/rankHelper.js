@@ -27,10 +27,23 @@ const ENGLISH_TO_TURKISH_RANKS = {
 /**
  * Maps English rank strings returned by Valorant MMR API to Turkish localized strings.
  */
-function translateEnglishRankToTurkish(englishRank) {
+function translateEnglishRankToTurkish(englishRank, kp = 0) {
   if (!englishRank) return 'Unranked';
   const key = englishRank.toLowerCase().trim();
-  return ENGLISH_TO_TURKISH_RANKS[key] || englishRank;
+  let translated = ENGLISH_TO_TURKISH_RANKS[key] || englishRank;
+
+  if (translated.startsWith('Immortal')) {
+    const numericKp = Number(kp) || 0;
+    if (numericKp >= 200) {
+      return 'Immortal 3';
+    } else if (numericKp >= 100) {
+      return 'Immortal 2';
+    } else {
+      return 'Immortal 1';
+    }
+  }
+
+  return translated;
 }
 
 /**
@@ -52,10 +65,42 @@ function getRankWeight(rankName) {
  * @returns {number} Detailed numeric weight
  */
 function getDetailedRankWeight(rankName, kp = 0) {
-  const baseWeight = getRankWeight(rankName);
-  const normalizedKp = Math.max(0, Math.min(100, Number(kp) || 0)) / 100;
-  
-  // Radiant does not have standard divisions, but we can treat it similarly
+  const translated = translateEnglishRankToTurkish(rankName, kp);
+  const baseWeight = getRankWeight(translated);
+  const numericKp = Number(kp) || 0;
+
+  if (translated.startsWith('Immortal')) {
+    let immoBase = 22.0; // Immortal 1
+    if (translated === 'Immortal 2') {
+      immoBase = 23.0;
+    } else if (translated === 'Immortal 3') {
+      immoBase = 24.0;
+    }
+
+    let divisionKp = numericKp;
+    let divisionRange = 100;
+
+    if (numericKp >= 200) {
+      divisionKp = numericKp - 200;
+      divisionRange = 150;
+      immoBase = 24.0;
+    } else if (numericKp >= 100) {
+      divisionKp = numericKp - 100;
+      divisionRange = 100;
+      immoBase = 23.0;
+    } else if (numericKp > 0) {
+      divisionKp = numericKp;
+      divisionRange = 100;
+      immoBase = 22.0;
+    } else {
+      return immoBase;
+    }
+
+    const divisionProgress = divisionKp / divisionRange;
+    return immoBase + Math.max(0, Math.min(0.99, divisionProgress));
+  }
+
+  const normalizedKp = Math.max(0, Math.min(100, numericKp)) / 100;
   return baseWeight + normalizedKp;
 }
 

@@ -1,4 +1,20 @@
 const https = require('https');
+const { User } = require('../models');
+
+const BOOSTER_DISCORD_IDS = {
+  'wm': '762259347430047745',
+  'levieen': '557194027632558080',
+  'cwrss': '335659090418073603',
+  'f4ld3x': '463607826703450122',
+  'aybo': '611921148007153686'
+};
+
+function getBoosterMention(boosterName) {
+  if (!boosterName) return '';
+  const key = boosterName.toLowerCase().trim();
+  const discordId = BOOSTER_DISCORD_IDS[key];
+  return discordId ? `<@${discordId}>` : boosterName;
+}
 
 /**
  * Sends a POST request to Discord Webhook with JSON payload.
@@ -61,6 +77,28 @@ function translateStatus(status) {
  * Notifies Discord channel when a new Elo Boost order is created.
  */
 async function notifyNewOrder(order) {
+  let boosterName = null;
+  if (order.booster_id) {
+    try {
+      const booster = await User.findByPk(order.booster_id);
+      if (booster) boosterName = booster.username;
+    } catch (err) {
+      console.error('Failed to fetch booster for discord notification:', err);
+    }
+  }
+
+  const fields = [
+    { name: 'Sipariş ID', value: `#${order.id}`, inline: true },
+    { name: 'Riot ID', value: order.customer_riot_id, inline: true },
+    { name: 'Başlangıç Rankı', value: order.start_rank, inline: true },
+    { name: 'Hedef Rankı', value: order.target_rank, inline: true },
+    { name: 'Sipariş Durumu', value: translateStatus(order.status), inline: true }
+  ];
+
+  if (boosterName) {
+    fields.push({ name: 'Atanan Booster', value: boosterName, inline: true });
+  }
+
   const embed = {
     title: '🆕 Yeni Elo Boost Siparişi Alındı! 🎮',
     color: 3447003, // Bright Blue
@@ -68,16 +106,18 @@ async function notifyNewOrder(order) {
     footer: {
       text: 'kodteslimal.com Elo Boost'
     },
-    fields: [
-      { name: 'Sipariş ID', value: `#${order.id}`, inline: true },
-      { name: 'Riot ID', value: order.customer_riot_id, inline: true },
-      { name: 'Başlangıç Rankı', value: order.start_rank, inline: true },
-      { name: 'Hedef Rankı', value: order.target_rank, inline: true },
-      { name: 'Sipariş Durumu', value: translateStatus(order.status), inline: true }
-    ]
+    fields: fields
   };
 
-  return sendDiscordWebhook({ embeds: [embed] });
+  const payload = { embeds: [embed] };
+  if (boosterName) {
+    const mention = getBoosterMention(boosterName);
+    if (mention) {
+      payload.content = `🔔 Atanan Booster: ${mention}`;
+    }
+  }
+
+  return sendDiscordWebhook(payload);
 }
 
 /**
@@ -113,7 +153,15 @@ async function notifyOrderStatusUpdate(order, oldStatus, boosterName = null) {
     fields: fields
   };
 
-  return sendDiscordWebhook({ embeds: [embed] });
+  const payload = { embeds: [embed] };
+  if (boosterName) {
+    const mention = getBoosterMention(boosterName);
+    if (mention) {
+      payload.content = `🔔 Atanan Booster: ${mention}`;
+    }
+  }
+
+  return sendDiscordWebhook(payload);
 }
 
 module.exports = {
