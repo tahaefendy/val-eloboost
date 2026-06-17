@@ -272,8 +272,8 @@ async function reassignOrder(req, res) {
 
     // Discord webhook notification
     try {
-      const { notifyOrderStatusUpdate } = require('../utils/discord');
-      notifyOrderStatusUpdate(order, oldStatus, newBooster.username).catch(err => console.error('Discord notify reassign error:', err));
+      const { notifyBoosterAssignment } = require('../utils/discord');
+      notifyBoosterAssignment(order, newBooster.username).catch(err => console.error('Discord notify reassign error:', err));
     } catch (discordErr) {
       console.error('Failed to dispatch Discord webhook for reassign:', discordErr);
     }

@@ -164,7 +164,39 @@ async function notifyOrderStatusUpdate(order, oldStatus, boosterName = null) {
   return sendDiscordWebhook(payload);
 }
 
+/**
+ * Notifies Discord channel specifically when a booster is assigned or reassigned to an order.
+ */
+async function notifyBoosterAssignment(order, boosterName) {
+  const mention = getBoosterMention(boosterName);
+  
+  const embed = {
+    title: '⚔️ Sipariş Booster\'a Atandı! 🎮',
+    color: 15105570, // Gold/Orange
+    timestamp: new Date().toISOString(),
+    footer: {
+      text: 'kodteslimal.com Elo Boost'
+    },
+    fields: [
+      { name: 'Sipariş ID', value: `#${order.id}`, inline: true },
+      { name: 'Riot ID', value: order.customer_riot_id, inline: true },
+      { name: 'Başlangıç Rankı', value: order.start_rank, inline: true },
+      { name: 'Güncel Rankı', value: `${order.current_rank || order.start_rank} (${order.current_kp || 0} KP)`, inline: true },
+      { name: 'Hedef Rankı', value: order.target_rank, inline: true },
+      { name: 'Atanan Booster', value: boosterName, inline: true }
+    ]
+  };
+
+  const payload = { embeds: [embed] };
+  if (mention) {
+    payload.content = `🔔 ${mention}, bu sipariş sana atandı! Başarılar.`;
+  }
+
+  return sendDiscordWebhook(payload);
+}
+
 module.exports = {
   notifyNewOrder,
-  notifyOrderStatusUpdate
+  notifyOrderStatusUpdate,
+  notifyBoosterAssignment
 };
