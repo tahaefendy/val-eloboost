@@ -480,7 +480,17 @@ async function getOrders(req, res) {
     }
 
     const orders = await Order.findAll(queryOptions);
-    return res.json(orders);
+
+    // Decrypt passwords for the response
+    const decryptedOrders = orders.map(order => {
+      const orderJson = order.toJSON();
+      if (orderJson.customer_riot_password) {
+        orderJson.customer_riot_password = decrypt(orderJson.customer_riot_password);
+      }
+      return orderJson;
+    });
+
+    return res.json(decryptedOrders);
   } catch (error) {
     console.error('GetOrders Error:', error);
     return res.status(500).json({ error: 'Sipariş listesi alınamadı.' });
