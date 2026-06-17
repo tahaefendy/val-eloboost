@@ -29,6 +29,9 @@ function sendDiscordWebhook(payload) {
 
     try {
       const url = new URL(webhookUrl);
+      if (!url.searchParams.has('with_components')) {
+        url.searchParams.set('with_components', 'true');
+      }
       const data = JSON.stringify(payload);
       
       const options = {
@@ -115,7 +118,22 @@ async function notifyNewOrder(order) {
     fields: fields
   };
 
-  const payload = { embeds: [embed] };
+  const payload = { 
+    embeds: [embed],
+    components: [
+      {
+        type: 1,
+        components: [
+          {
+            type: 2,
+            style: 5,
+            label: 'Sipariş Detaylarını Görüntüle',
+            url: `https://kodteslimal.com/booster/dashboard?order_id=${order.id}`
+          }
+        ]
+      }
+    ]
+  };
   if (boosterName) {
     const mention = getBoosterMention(boosterName);
     if (mention) {
@@ -149,12 +167,6 @@ async function notifyOrderStatusUpdate(order, oldStatus, boosterName = null) {
     fields.push({ name: 'Atanan Booster', value: boosterName, inline: true });
   }
 
-  fields.push({
-    name: '🔗 İşlem Paneli',
-    value: `[Sipariş Detaylarını Görüntüle](https://kodteslimal.com/booster/dashboard?order_id=${order.id})`,
-    inline: false
-  });
-
   const embed = {
     title: '🔄 Elo Boost Siparişi Güncellendi!',
     color: color,
@@ -165,7 +177,22 @@ async function notifyOrderStatusUpdate(order, oldStatus, boosterName = null) {
     fields: fields
   };
 
-  const payload = { embeds: [embed] };
+  const payload = { 
+    embeds: [embed],
+    components: [
+      {
+        type: 1,
+        components: [
+          {
+            type: 2,
+            style: 5,
+            label: 'Sipariş Detaylarını Görüntüle',
+            url: `https://kodteslimal.com/booster/dashboard?order_id=${order.id}`
+          }
+        ]
+      }
+    ]
+  };
   if (boosterName) {
     const mention = getBoosterMention(boosterName);
     if (mention) {
@@ -195,16 +222,26 @@ async function notifyBoosterAssignment(order, boosterName) {
       { name: 'Başlangıç Rankı', value: order.start_rank, inline: true },
       { name: 'Güncel Rankı', value: `${order.current_rank || order.start_rank} (${order.current_kp || 0} KP)`, inline: true },
       { name: 'Hedef Rankı', value: order.target_rank, inline: true },
-      { name: 'Atanan Booster', value: boosterName, inline: true },
-      {
-        name: '🔗 İşlem Paneli',
-        value: `[Sipariş Detaylarını Görüntüle](https://kodteslimal.com/booster/dashboard?order_id=${order.id})`,
-        inline: false
-      }
+      { name: 'Atanan Booster', value: boosterName, inline: true }
     ]
   };
 
-  const payload = { embeds: [embed] };
+  const payload = { 
+    embeds: [embed],
+    components: [
+      {
+        type: 1,
+        components: [
+          {
+            type: 2,
+            style: 5,
+            label: 'Sipariş Detaylarını Görüntüle',
+            url: `https://kodteslimal.com/booster/dashboard?order_id=${order.id}`
+          }
+        ]
+      }
+    ]
+  };
   if (mention) {
     payload.content = `🔔 ${mention}, bu sipariş sana atandı! Başarılar.`;
   }
