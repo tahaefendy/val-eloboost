@@ -25,6 +25,9 @@ router.get('/orders', adminController.getOrders);
 // Admin & Manager ONLY endpoints
 router.use(requireRole('admin', 'manager'));
 
+// Test Discord Webhook
+router.post('/test-discord', adminController.testDiscordWebhook);
+
 // User creation & update
 router.post('/users', adminController.createUser);
 router.put('/users/:id', adminController.updateUser);

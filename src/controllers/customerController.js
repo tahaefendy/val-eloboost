@@ -132,6 +132,14 @@ async function createOrder(req, res) {
 
     await transaction.commit();
 
+    // Discord webhook notification
+    try {
+      const { notifyNewOrder } = require('../utils/discord');
+      notifyNewOrder(order).catch(err => console.error('Discord notification error:', err));
+    } catch (discordErr) {
+      console.error('Failed to dispatch Discord webhook:', discordErr);
+    }
+
     return res.status(201).json({
       message: 'Sipariş başarıyla oluşturuldu.',
       order_id: order.id,

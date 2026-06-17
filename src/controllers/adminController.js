@@ -269,6 +269,15 @@ async function reassignOrder(req, res) {
     }, { transaction });
 
     await transaction.commit();
+
+    // Discord webhook notification
+    try {
+      const { notifyOrderStatusUpdate } = require('../utils/discord');
+      notifyOrderStatusUpdate(order, oldStatus, newBooster.username).catch(err => console.error('Discord notify reassign error:', err));
+    } catch (discordErr) {
+      console.error('Failed to dispatch Discord webhook for reassign:', discordErr);
+    }
+
     return res.json({ message: 'Sipariş başarıyla yeniden atandı.', order });
   } catch (error) {
     await transaction.rollback();
@@ -405,6 +414,20 @@ async function updateOrderStatus(req, res) {
     }, { transaction });
 
     await transaction.commit();
+
+    // Discord webhook notification
+    try {
+      const { notifyOrderStatusUpdate } = require('../utils/discord');
+      let boosterName = null;
+      if (order.booster_id) {
+        const booster = await User.findByPk(order.booster_id);
+        if (booster) boosterName = booster.username;
+      }
+      notifyOrderStatusUpdate(order, oldStatus, boosterName).catch(err => console.error('Discord notify update error:', err));
+    } catch (discordErr) {
+      console.error('Failed to dispatch Discord webhook for update:', discordErr);
+    }
+
     return res.json({ message: 'Sipariş güncellendi.', order });
   } catch (error) {
     await transaction.rollback();
@@ -550,6 +573,28 @@ async function bulkCancelOrders(req, res) {
   }
 }
 
+async function testDiscordWebhook(req, res) {
+  try {
+    const { notifyNewOrder } = require('../utils/discord');
+    const dummyOrder = {
+      id: 9999,
+      customer_riot_id: 'TestPlayer#TR1',
+      start_rank: 'Gold 1',
+      target_rank: 'Platinum 1',
+      status: 'pending'
+    };
+    const success = await notifyNewOrder(dummyOrder);
+    if (success) {
+      return res.json({ success: true, message: 'Discord webhook test mesajı başarıyla gönderildi.' });
+    } else {
+      return res.status(500).json({ error: 'Discord webhook test mesajı gönderilemedi.' });
+    }
+  } catch (error) {
+    console.error('testDiscordWebhook error:', error);
+    return res.status(500).json({ error: 'İşlem sırasında hata oluştu.', message: error.message });
+  }
+}
+
 module.exports = {
   login,
   createUser,
@@ -562,5 +607,6 @@ module.exports = {
   getOrders,
   deleteUser,
   updateUser,
-  bulkCancelOrders
+  bulkCancelOrders,
+  testDiscordWebhook
 };
