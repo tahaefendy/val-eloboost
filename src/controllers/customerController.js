@@ -49,7 +49,7 @@ async function verifyKey(req, res) {
 async function createOrder(req, res) {
   const transaction = await sequelize.transaction();
   try {
-    const { key_code, customer_riot_id, customer_riot_username, customer_riot_password, start_rank, target_rank, region } = req.body;
+    const { key_code, customer_riot_id, customer_riot_username, customer_riot_password, start_rank, target_rank, region, placement_matches } = req.body;
 
     if (!key_code || !customer_riot_id || !customer_riot_username || !customer_riot_password) {
       await transaction.rollback();
@@ -71,7 +71,12 @@ async function createOrder(req, res) {
     let finalStartRank = start_rank;
     let finalTargetRank = target_rank;
 
-    if (key.is_fixed_rank) {
+    const isPlacement = key.placement_matches > 0;
+
+    if (isPlacement) {
+      finalStartRank = 'Unranked';
+      finalTargetRank = `Yerleştirme (${key.placement_matches} Maç)`;
+    } else if (key.is_fixed_rank) {
       finalStartRank = key.start_rank;
       finalTargetRank = key.target_rank;
     } else {
@@ -193,6 +198,20 @@ async function trackOrder(req, res) {
           order.current_rank,
           order.current_kp
         );
+
+        if (order.progress_percentage >= 100 && order.status !== 'completed' && order.status !== 'canceled') {
+          order.status = 'completed';
+          order.customer_riot_password = null;
+
+          // Decrement booster active job count
+          if (order.booster_id) {
+            const booster = await User.findByPk(order.booster_id);
+            if (booster && booster.active_jobs_count > 0) {
+              booster.active_jobs_count -= 1;
+              await booster.save();
+            }
+          }
+        }
 
         await order.save();
         updateSource = 'live_api';
