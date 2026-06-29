@@ -48,6 +48,11 @@ const User = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false
+  },
+  discord_id: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null
   }
 });
 

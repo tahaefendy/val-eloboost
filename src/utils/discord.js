@@ -1,19 +1,17 @@
 const https = require('https');
 const { User } = require('../models');
 
-const BOOSTER_DISCORD_IDS = {
-  'wm': '762259347430047745',
-  'levieen': '557194027632558080',
-  'cwrss': '335659090418073603',
-  'f4ld3x': '463607826703450122',
-  'aybo': '611921148007153686'
-};
-
-function getBoosterMention(boosterName) {
+async function getBoosterMention(boosterName) {
   if (!boosterName) return '';
-  const key = boosterName.toLowerCase().trim();
-  const discordId = BOOSTER_DISCORD_IDS[key];
-  return discordId ? `<@${discordId}>` : boosterName;
+  try {
+    const user = await User.findOne({ where: { username: boosterName.trim() } });
+    if (user && user.discord_id) {
+      return `<@${user.discord_id}>`;
+    }
+  } catch (e) {
+    // ignore
+  }
+  return boosterName;
 }
 
 /**
@@ -135,7 +133,7 @@ async function notifyNewOrder(order) {
     ]
   };
   if (boosterName) {
-    const mention = getBoosterMention(boosterName);
+    const mention = await getBoosterMention(boosterName);
     if (mention) {
       payload.content = `🔔 Atanan Booster: ${mention}`;
     }
@@ -194,7 +192,7 @@ async function notifyOrderStatusUpdate(order, oldStatus, boosterName = null) {
     ]
   };
   if (boosterName) {
-    const mention = getBoosterMention(boosterName);
+    const mention = await getBoosterMention(boosterName);
     if (mention) {
       payload.content = `🔔 Atanan Booster: ${mention}`;
     }

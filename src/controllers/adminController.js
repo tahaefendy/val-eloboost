@@ -52,7 +52,7 @@ async function login(req, res) {
  */
 async function createUser(req, res) {
   try {
-    const { username, email, password, role, max_boost_rank } = req.body;
+    const { username, email, password, role, max_boost_rank, discord_id } = req.body;
     if (!username || !email || !password || !role) {
       return res.status(400).json({ error: 'Eksik parametreler.' });
     }
@@ -64,6 +64,7 @@ async function createUser(req, res) {
       password: hashedPassword,
       role,
       max_boost_rank: max_boost_rank || 'Radiant',
+      discord_id: discord_id || null,
       active_jobs_count: 0
     });
 
@@ -188,7 +189,7 @@ async function listBoosters(req, res) {
   try {
     const boosters = await User.findAll({
       where: { role: 'booster' },
-      attributes: ['id', 'username', 'email', 'max_boost_rank', 'is_active', 'is_priority']
+      attributes: ['id', 'username', 'email', 'max_boost_rank', 'is_active', 'is_priority', 'discord_id']
     });
 
     const activeOrders = await Order.findAll({
@@ -205,6 +206,7 @@ async function listBoosters(req, res) {
         max_boost_rank: booster.max_boost_rank,
         is_active: booster.is_active,
         is_priority: booster.is_priority,
+        discord_id: booster.discord_id,
         active_jobs_count: count
       };
     });
@@ -519,7 +521,7 @@ async function getOrders(req, res) {
 async function updateUser(req, res) {
   try {
     const { id } = req.params;
-    const { is_active, max_boost_rank, is_priority } = req.body;
+    const { is_active, max_boost_rank, is_priority, discord_id, username, password } = req.body;
 
     const user = await User.findByPk(id);
     if (!user) {
@@ -534,6 +536,16 @@ async function updateUser(req, res) {
     }
     if (is_priority !== undefined) {
       user.is_priority = !!is_priority;
+    }
+    if (discord_id !== undefined) {
+      user.discord_id = discord_id || null;
+    }
+    if (username !== undefined && username.trim()) {
+      user.username = username.trim();
+    }
+    if (password !== undefined && password.trim()) {
+      const bcrypt = require('bcryptjs');
+      user.password = await bcrypt.hash(password.trim(), 10);
     }
 
     await user.save();
