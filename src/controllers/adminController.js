@@ -187,7 +187,7 @@ async function listBoosters(req, res) {
   try {
     const boosters = await User.findAll({
       where: { role: 'booster' },
-      attributes: ['id', 'username', 'email', 'max_boost_rank', 'is_active']
+      attributes: ['id', 'username', 'email', 'max_boost_rank', 'is_active', 'is_priority']
     });
 
     const activeOrders = await Order.findAll({
@@ -203,6 +203,7 @@ async function listBoosters(req, res) {
         email: booster.email,
         max_boost_rank: booster.max_boost_rank,
         is_active: booster.is_active,
+        is_priority: booster.is_priority,
         active_jobs_count: count
       };
     });
@@ -397,6 +398,20 @@ async function updateOrderStatus(req, res) {
       order.current_kp
     );
 
+    if (order.progress_percentage >= 100 && order.status !== 'completed' && order.status !== 'canceled') {
+      order.status = 'completed';
+      order.customer_riot_password = null;
+
+      // Decrement booster active job count
+      if (order.booster_id) {
+        const booster = await User.findByPk(order.booster_id, { transaction });
+        if (booster && booster.active_jobs_count > 0) {
+          booster.active_jobs_count -= 1;
+          await booster.save({ transaction });
+        }
+      }
+    }
+
     await order.save({ transaction });
 
     let logBoosterId = req.user.id;
@@ -409,7 +424,7 @@ async function updateOrderStatus(req, res) {
     await BoosterLog.create({
       order_id: order.id,
       booster_id: logBoosterId,
-      action: `Sipariş güncellendi: Durum = ${status || oldStatus}, Rank = ${order.current_rank}, KP = ${order.current_kp}`,
+      action: `Sipariş güncellendi: Durum = ${order.status}, Rank = ${order.current_rank}, KP = ${order.current_kp}`,
       ip_address: req.ip
     }, { transaction });
 
@@ -503,8 +518,8 @@ async function getOrders(req, res) {
 async function updateUser(req, res) {
   try {
     const { id } = req.params;
-    const { is_active, max_boost_rank } = req.body;
-    
+    const { is_active, max_boost_rank, is_priority } = req.body;
+
     const user = await User.findByPk(id);
     if (!user) {
       return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
@@ -515,6 +530,9 @@ async function updateUser(req, res) {
     }
     if (max_boost_rank !== undefined) {
       user.max_boost_rank = max_boost_rank;
+    }
+    if (is_priority !== undefined) {
+      user.is_priority = !!is_priority;
     }
 
     await user.save();

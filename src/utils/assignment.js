@@ -33,8 +33,14 @@ async function autoAssignOrder(order, transaction = null) {
       return false;
     }
 
-    // 3. Select booster with minimum active_jobs_count
-    eligibleBoosters.sort((a, b) => a.active_jobs_count - b.active_jobs_count);
+    // 3. Select booster with minimum active_jobs_count; priority boosters win ties
+    eligibleBoosters.sort((a, b) => {
+      if (a.active_jobs_count !== b.active_jobs_count) {
+        return a.active_jobs_count - b.active_jobs_count;
+      }
+      // Same count: priority booster comes first
+      return (b.is_priority ? 1 : 0) - (a.is_priority ? 1 : 0);
+    });
     const chosenBooster = eligibleBoosters[0];
 
     // 4. Assign the order to this booster
