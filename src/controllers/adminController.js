@@ -146,7 +146,7 @@ function generateRandomKey() {
  */
 async function createStockKey(req, res) {
   try {
-    const { key_code: req_key_code, is_fixed_rank, start_rank, target_rank } = req.body;
+    const { key_code: req_key_code, is_fixed_rank, start_rank, target_rank, placement_matches } = req.body;
 
     let key_code = req_key_code;
     if (!key_code) {
@@ -170,6 +170,7 @@ async function createStockKey(req, res) {
       is_fixed_rank: !!is_fixed_rank,
       start_rank: is_fixed_rank ? start_rank : null,
       target_rank: is_fixed_rank ? target_rank : null,
+      placement_matches: placement_matches != null ? parseInt(placement_matches) : null,
       is_used: false
     });
 

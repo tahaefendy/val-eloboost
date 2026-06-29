@@ -25,6 +25,11 @@ const StockKey = sequelize.define('StockKey', {
     type: DataTypes.STRING,
     allowNull: true
   },
+  placement_matches: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: null
+  },
   is_used: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
