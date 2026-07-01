@@ -138,11 +138,21 @@ function calculateProgress(startRank, targetRank, currentRank, currentKp = 0) {
   return Math.round(percentage * 100) / 100;
 }
 
+/**
+ * Placement-match orders use a synthetic target_rank like "Yerleştirme (5 Maç)"
+ * which has no weight in VALORANT_RANKS, so calculateProgress() always reports 100%.
+ * Callers must use this to skip auto-completion and require a manual status update instead.
+ */
+function isPlacementTarget(targetRank) {
+  return typeof targetRank === 'string' && targetRank.startsWith('Yerleştirme');
+}
+
 module.exports = {
   VALORANT_RANKS,
   getRankWeight,
   getDetailedRankWeight,
   isRankHigherOrEqual,
   calculateProgress,
-  translateEnglishRankToTurkish
+  translateEnglishRankToTurkish,
+  isPlacementTarget
 };

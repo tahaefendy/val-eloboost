@@ -1,6 +1,6 @@
 const { User, StockKey, Order, BoosterLog } = require('../models');
-const { decrypt } = require('../utils/encryption');
-const { isRankHigherOrEqual, calculateProgress } = require('../utils/rankHelper');
+const { encrypt, decrypt } = require('../utils/encryption');
+const { isRankHigherOrEqual, calculateProgress, isPlacementTarget } = require('../utils/rankHelper');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const sequelize = require('../config/database');
@@ -349,7 +349,7 @@ async function updateOrderStatus(req, res) {
   const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
-    const { status, current_rank, current_kp, target_rank, start_rank, customer_riot_username, region } = req.body;
+    const { status, current_rank, current_kp, target_rank, start_rank, customer_riot_id, customer_riot_username, customer_riot_password, region } = req.body;
 
     const order = await Order.findByPk(id, { transaction });
     if (!order) {
@@ -372,7 +372,9 @@ async function updateOrderStatus(req, res) {
     if (current_kp !== undefined) order.current_kp = Number(current_kp);
     if (target_rank) order.target_rank = target_rank;
     if (start_rank) order.start_rank = start_rank;
+    if (customer_riot_id) order.customer_riot_id = customer_riot_id;
     if (customer_riot_username) order.customer_riot_username = customer_riot_username;
+    if (customer_riot_password) order.customer_riot_password = encrypt(customer_riot_password);
     if (region) order.region = region;
 
     if (status && status !== oldStatus) {
@@ -401,7 +403,7 @@ async function updateOrderStatus(req, res) {
       order.current_kp
     );
 
-    if (order.progress_percentage >= 100 && order.status !== 'completed' && order.status !== 'canceled') {
+    if (order.progress_percentage >= 100 && order.status !== 'completed' && order.status !== 'canceled' && !isPlacementTarget(order.target_rank)) {
       order.status = 'completed';
       order.customer_riot_password = null;
 

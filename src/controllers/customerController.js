@@ -1,7 +1,7 @@
 const { StockKey, Order, User } = require('../models');
 const { encrypt } = require('../utils/encryption');
 const { autoAssignOrder } = require('../utils/assignment');
-const { calculateProgress, translateEnglishRankToTurkish } = require('../utils/rankHelper');
+const { calculateProgress, translateEnglishRankToTurkish, isPlacementTarget } = require('../utils/rankHelper');
 const { getLiveMmr } = require('../utils/valorantApi');
 const sequelize = require('../config/database');
 
@@ -199,7 +199,7 @@ async function trackOrder(req, res) {
           order.current_kp
         );
 
-        if (order.progress_percentage >= 100 && order.status !== 'completed' && order.status !== 'canceled') {
+        if (order.progress_percentage >= 100 && order.status !== 'completed' && order.status !== 'canceled' && !isPlacementTarget(order.target_rank)) {
           order.status = 'completed';
           order.customer_riot_password = null;
 
